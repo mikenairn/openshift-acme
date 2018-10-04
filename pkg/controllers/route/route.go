@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"fmt"
 	"math/rand"
 	"reflect"
@@ -514,9 +515,17 @@ func (rc *RouteController) handle(key string) error {
 		case acme.StatusValid:
 			glog.V(4).Infof("Authorization %q for Route %s successfully validated", authorization.URI, key)
 			// provision cert
+
+			commonName := routeReadOnly.Annotations[api.TlsAcmeCommonName]
+			if commonName == "" {
+				commonName = routeReadOnly.Spec.Host
+			}
+
+			fmt.Printf("commonName = %s\n", commonName)
+
 			template := x509.CertificateRequest{
 				Subject: pkix.Name{
-					CommonName: routeReadOnly.Spec.Host,
+					CommonName: commonName,
 				},
 			}
 			template.DNSNames = append(template.DNSNames, routeReadOnly.Spec.Host)
@@ -532,6 +541,11 @@ func (rc *RouteController) handle(key string) error {
 
 			// TODO: protect with expectations
 			// TODO: aks to split CreateCert func in acme library to avoid embedded pooling
+
+			fmt.Println("---- mnairn debug ----")
+			fmt.Printf("%+v\n", template)
+			fmt.Printf("%+v\n", base64.RawURLEncoding.EncodeToString(csr))
+
 			der, certUrl, err := client.Client.CreateCert(ctx, csr, 0, true)
 			if err != nil {
 				return fmt.Errorf("failed to create ACME certificate: %v", err)

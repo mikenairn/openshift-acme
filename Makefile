@@ -14,7 +14,7 @@ GO_PACKAGES :=./cmd/... ./pkg/...
 GO_PACKAGES_TEST :=./test/...
 GO_PACKAGES_ALL :=$(GO_PACKAGES) $(GO_PACKAGES_TEST)
 GO_IMPORT_PATH :=github.com/tnozicka/openshift-acme
-IMAGE_NAME :=docker.io/tnozicka/openshift-acme
+IMAGE_NAME :=quay.io/mnairn/openshift-acme
 
 # we intentionaly don't specify this value because test are making changes to the cluster so we wan't user to configure it explicitely
 GO_ET_KUBECONFIG :="<unspecified>"
